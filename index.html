@@ -61,6 +61,8 @@ canvas {
 
 <script>
 
+var isMobile = (innerWidth <= 800);
+
 var sounds = [
   "airhorn",
   "applause",
@@ -79,86 +81,91 @@ var button = d3.select("body").selectAll("div.sound")
   .style("background-image", function(d) { return "url(" + d.image + ")"; });
 
 button
-  .append("div.inner")
-  .text(function(d, i) { return (i+1); });
-
-button
   .append("audio")
   .attr("src", function(d) { return d.audio; })
-  .attr("loop", true)
-  .attr("controls", true);
+  .attr("loop", true);
 
-// button.on("mousedown", start);
-// button.on("mouseup", stop);
-// button.on("mousemove", volume);
+if(isMobile) {
+  button.select("audio").attr("controls", true);
+}
 
-// d3.select(window).on("keydown", function(d) {  
-//   var key = String.fromCharCode(d3.event.keyCode) - 1;
-//   var thisButton = button.filter(function(d) { return d == sounds[key]; }).node();
-//   start.call(thisButton, sounds[key]);
-// });
+// desktop version!
+if(!isMobile) {
 
-// d3.select(window).on("keyup", function(d) {
-//   var key = String.fromCharCode(d3.event.keyCode) - 1;
-//   var thisButton = button.filter(function(d) { return d == sounds[key]; }).node();
-//   stop.call(thisButton, sounds[key]);
-// });
+  button
+    .append("div.inner")
+    .text(function(d, i) { return (i+1); });
 
-// function start(d) {
-//   d.active = true;
-//   d3.select(this).classed("active", true);
-//   d3.select(this).select("audio").node().play();
-// }
+  button.on("mousedown", start);
+  button.on("mouseup", stop);
+  button.on("mousemove", volume);
 
-// function stop(d) {
-//   d.active = false;
-//   d3.select(this).classed("active", false);
-//   var audio = d3.select(this).select("audio").node()
-//   audio.pause();
-//   audio.currentTime = 0;
-// }
+  d3.select(window).on("keydown", function(d) {  
+    var key = String.fromCharCode(d3.event.keyCode) - 1;
+    var thisButton = button.filter(function(d) { return d == sounds[key]; }).node();
+    start.call(thisButton, sounds[key]);
+  });
 
-// function volume(d) {
-//   var audio = d3.select(this).select("audio").node();
-//   audio.volume = d3.mouse(this)[0] / this.offsetWidth;
-// }
+  d3.select(window).on("keyup", function(d) {
+    var key = String.fromCharCode(d3.event.keyCode) - 1;
+    var thisButton = button.filter(function(d) { return d == sounds[key]; }).node();
+    stop.call(thisButton, sounds[key]);
+  });
 
-// /// BACKGROUND
+  function start(d) {
+    d.active = true;
+    d3.select(this).classed("active", true);
+    d3.select(this).select("audio").node().play();
+  }
 
-// var canvas = d3.select("body").append("canvas")
-//   .attr({width: innerWidth, height: innerHeight});
+  function stop(d) {
+    d.active = false;
+    d3.select(this).classed("active", false);
+    var audio = d3.select(this).select("audio").node()
+    audio.pause();
+    audio.currentTime = 0;
+  }
 
-// var ctx = canvas.node().getContext("2d");
+  function volume(d) {
+    var audio = d3.select(this).select("audio").node();
+    audio.volume = d3.mouse(this)[0] / this.offsetWidth;
+  }
 
-// // TIMER
+  /// BACKGROUND
 
-// d3.timer(function(t) {
+  var canvas = d3.select("body").append("canvas")
+    .attr({width: innerWidth, height: innerHeight});
 
-//   // update scrub overlay
-//   button.each(function(d) {
-//     var audio = d3.select(this).select("audio").node();
-//     d3.select(this).select(".inner")
-//       .style("background-color", "hsla("+ 
-//         Math.floor(audio.currentTime*90) + "," + 
-//         Math.floor(audio.volume*100) + "%, 50%," + 
-//         (d.active ? .5 : 0) + ")");
-//   });
+  var ctx = canvas.node().getContext("2d");
 
-//   // update background
-//   ctx.font = "bold 48px sans-serif";
+  // TIMER
 
-//   ctx.fillStyle = d3.rgb(d3.hsl(t % 360, 1, .5)).toString();
-//   ctx.fillText("Businessweek’s", ((t/2) % (innerWidth + 600)) - 300, (t/2) % (innerHeight + 150));
+  d3.timer(function(t) {
 
-//   ctx.fillStyle = d3.rgb(d3.hsl(t/2 % 360, 1, .7)).toString();
-//   ctx.fillText("Got", innerWidth - ((t/3) % (innerWidth + 600)) + 300, (t/3) % (innerHeight + 150));
+    // update scrub overlay
+    button.each(function(d) {
+      var audio = d3.select(this).select("audio").node();
+      d3.select(this).select(".inner")
+        .style("background-color", "hsla("+ 
+          Math.floor(audio.currentTime*90) + "," + 
+          Math.floor(audio.volume*100) + "%, 50%," + 
+          (d.active ? .5 : 0) + ")");
+    });
 
-//   ctx.fillStyle = d3.rgb(d3.hsl(t/3 % 360, 1, .4)).toString();
-//   ctx.fillText("Talent", innerWidth - ((t/4) % (innerWidth + 600)) + 300, (innerHeight+150) - ((t/3) % (innerHeight + 150)));
+    // update background
+    ctx.font = "bold 48px sans-serif";
 
-// });
+    ctx.fillStyle = d3.rgb(d3.hsl(t % 360, 1, .5)).toString();
+    ctx.fillText("Businessweek’s", ((t/2) % (innerWidth + 600)) - 300, (t/2) % (innerHeight + 150));
 
+    ctx.fillStyle = d3.rgb(d3.hsl(t/2 % 360, 1, .7)).toString();
+    ctx.fillText("Got", innerWidth - ((t/3) % (innerWidth + 600)) + 300, (t/3) % (innerHeight + 150));
 
+    ctx.fillStyle = d3.rgb(d3.hsl(t/3 % 360, 1, .4)).toString();
+    ctx.fillText("Talent", innerWidth - ((t/4) % (innerWidth + 600)) + 300, (innerHeight+150) - ((t/3) % (innerHeight + 150)));
+
+  });
+}
 
 
 </script>
